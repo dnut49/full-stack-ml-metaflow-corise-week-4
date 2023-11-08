@@ -1,11 +1,11 @@
-from metaflow import FlowSpec, step, card, conda_base, current, Parameter, Flow, trigger
+from metaflow import FlowSpec, step, card, conda_base, current, Parameter, Flow, trigger, project
 from metaflow.cards import Markdown, Table, Image, Artifact
 
 URL = "https://outerbounds-datasets.s3.us-west-2.amazonaws.com/taxi/latest.parquet"
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
-
-@trigger(events=["s3"])
+@project(name="taxi_fare_prediction")
+# @trigger(events=["s3"])
 @conda_base(
     libraries={
         "pandas": "1.4.2",
