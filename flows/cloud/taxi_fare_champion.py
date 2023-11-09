@@ -99,7 +99,7 @@ class TaxiFarePrediction(FlowSpec):
     @step
     def validate(self):
         from sklearn.model_selection import cross_val_score
-
+        self.model_type = "baseline"
         self.scores = cross_val_score(self.model, self.X, self.y, cv=5)
         current.card.append(Markdown("# Taxi Fare Prediction Results"))
         current.card.append(
@@ -112,7 +112,6 @@ class TaxiFarePrediction(FlowSpec):
 
     @step
     def end(self):
-        self.model_type = "baseline"
         print("Success!")
 
 

@@ -101,8 +101,8 @@ class TaxiFarePrediction(FlowSpec):
     @step
     def validate(self):
         from sklearn.model_selection import cross_val_score
-
-        self.scores = cross_val_score(self.model, self.X, self.y, cv=5)
+        self.model_type = "elasticnet"
+        self.scores = cross_val_score(self.model, self.X, self.y, cv=10)
         current.card.append(Markdown("# Taxi Fare Prediction Results"))
         current.card.append(
             Table(
@@ -114,7 +114,6 @@ class TaxiFarePrediction(FlowSpec):
 
     @step
     def end(self):
-        self.model_type = "elasticnet"
         print("Success!")
 
 
