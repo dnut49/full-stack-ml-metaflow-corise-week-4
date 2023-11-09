@@ -1,11 +1,11 @@
-from metaflow import FlowSpec, step, card, conda_base, current, Parameter, Flow, trigger, project
+from metaflow import FlowSpec, step, card, conda_base, current, Parameter, Flow, trigger, project, retry, timeout
 from metaflow.cards import Markdown, Table, Image, Artifact
 
 URL = "https://outerbounds-datasets.s3.us-west-2.amazonaws.com/taxi/latest.parquet"
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 @project(name="taxi_fare_prediction")
-# @trigger(events=["s3"])
+@trigger(events=["s3"])
 @conda_base(
     libraries={
         "pandas": "1.4.2",
@@ -31,7 +31,8 @@ class TaxiFarePrediction(FlowSpec):
         for f in obviously_bad_data_filters:
             df = df[f]
         return df
-
+        
+    @retry(times=3, minutes_between_retries=1)
     @step
     def start(self):
         import pandas as pd
@@ -49,10 +50,10 @@ class TaxiFarePrediction(FlowSpec):
     @step
     def linear_model(self):
         "Fit a single variable, linear model to the data."
-        from sklearn.linear_model import LinearRegression
+        from sklearn.linear_model import ElasticNet
 
         # TODO: Play around with the model if you are feeling it.
-        self.model = LinearRegression()
+        self.model = ElasticNet(random_state=0)
 
         self.next(self.validate)
 
@@ -96,6 +97,7 @@ class TaxiFarePrediction(FlowSpec):
         return rows
 
     @card(type="corise")
+    @timeout(minutes=5)
     @step
     def validate(self):
         from sklearn.model_selection import cross_val_score
@@ -112,7 +114,7 @@ class TaxiFarePrediction(FlowSpec):
 
     @step
     def end(self):
-        self.model_type = "baseline"
+        self.model_type = "elasticnet"
         print("Success!")
 
 
